@@ -7,24 +7,28 @@ def init_db():
     
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS vehicles (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        make TEXT NOT NULL,
+        vehicle_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        brand TEXT NOT NULL,
         model TEXT NOT NULL,
         year INTEGER NOT NULL,
-        price REAL NOT NULL,
-        availability BOOLEAN NOT NULL DEFAULT 1
+        fuel_type TEXT NOT NULL,
+        purchase_price REAL NOT NULL,
+        purchase_date DATE NOT NULL,
+        mileage_km INTEGER NOT NULL,
+        availability TEXT CHECK(availability IN ('Available', 'Not Available')) NOT NULL
     );
     """)
     
     sample_data = [
-        ("Toyota", "Corolla", 2020, 15000, True),
-        ("Honda", "Civic", 2019, 16000, True),
-        ("Ford", "Focus", 2021, 18000, True),
-        ("BMW", "3 Series", 2018, 25000, False)
+        ("Toyota", "Corolla", 2020, "Petrol", 15000.00, "2020-05-15", 20000, "Available"),
+        ("Honda", "Civic", 2019, "Diesel", 16000.00, "2019-03-10", 30000, "Available"),
+        ("Ford", "Focus", 2021, "Hybrid", 18000.00, "2021-07-25", 15000, "Available"),
+        ("BMW", "3 Series", 2018, "Petrol", 25000.00, "2018-10-20", 50000, "Not Available")
     ]
+    
     cursor.executemany("""
-    INSERT INTO vehicles (make, model, year, price, availability)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO vehicles (brand, model, year, fuel_type, purchase_price, purchase_date, mileage_km, availability)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, sample_data)
     
     conn.commit()
