@@ -4,6 +4,7 @@ from flasgger import Swagger
 import os
 from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+from db import init_db
 
 load_dotenv()
 
@@ -16,6 +17,8 @@ USERS_SERVICE_URL = os.getenv('USERS_SERVICE_URL')
 
 app.config['JWT_SECRET_KEY'] = SECRET_KEY
 jwt = JWTManager(app)
+
+init_db()
 
 @app.route('/vehicles', methods=['POST'])
 @jwt_required() 

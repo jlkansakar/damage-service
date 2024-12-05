@@ -1,8 +1,13 @@
 import sqlite3
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+DATABASE = os.getenv("DATABASE")
 
 def init_db():
     """Initializes the database and populates it with sample data."""
-    conn = sqlite3.connect("vehicles.db")
+    conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     
     cursor.execute("""
