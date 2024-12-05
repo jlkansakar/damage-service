@@ -24,7 +24,7 @@ def init_db():
     );
     """)
     
-    sample_data = [
+    '''sample_data = [
         ("Toyota", "Corolla", 2020, "Petrol", 15000.00, "2020-05-15", 20000, "Available"),
         ("Honda", "Civic", 2019, "Diesel", 16000.00, "2019-03-10", 30000, "Available"),
         ("Ford", "Focus", 2021, "Hybrid", 18000.00, "2021-07-25", 15000, "Available"),
@@ -34,7 +34,7 @@ def init_db():
     cursor.executemany("""
     INSERT INTO vehicles (brand, model, year, fuel_type, purchase_price, purchase_date, mileage_km, availability)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, sample_data)
+    """, sample_data)'''
     
     conn.commit()
     conn.close()
