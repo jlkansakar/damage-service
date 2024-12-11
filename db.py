@@ -3,38 +3,36 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-DATABASE = os.getenv("DATABASE")
+# DATABASE = os.getenv("DATABASE")
 
 def init_db():
     """Initializes the database and populates it with sample data."""
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect("damages.db")
     cursor = conn.cursor()
-    
+
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS vehicles (
-        vehicle_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        brand TEXT NOT NULL,
-        model TEXT NOT NULL,
-        year INTEGER NOT NULL,
-        fuel_type TEXT NOT NULL,
-        purchase_price REAL NOT NULL,
-        purchase_date DATE NOT NULL,
-        mileage_km INTEGER NOT NULL,
-        availability TEXT CHECK(availability IN ('Available', 'Not Available')) NOT NULL
+    CREATE TABLE IF NOT EXISTS damages (
+        damage_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        vehicle_id INTEGER NOT NULL,
+        description TEXT NOT NULL,
+        date TEXT NOT NULL,
+        damage_severity TEXT CHECK(damage_severity IN ('Light', 'Moderate', 'Heavy')) NOT NULL,
+        repair_status INTEGER NOT NULL
+        
     );
     """)
     
-    '''sample_data = [
-        ("Toyota", "Corolla", 2020, "Petrol", 15000.00, "2020-05-15", 20000, "Available"),
-        ("Honda", "Civic", 2019, "Diesel", 16000.00, "2019-03-10", 30000, "Available"),
-        ("Ford", "Focus", 2021, "Hybrid", 18000.00, "2021-07-25", 15000, "Available"),
-        ("BMW", "3 Series", 2018, "Petrol", 25000.00, "2018-10-20", 50000, "Not Available")
+    sample_data = [
+        (3, "Fender bender", "2024-04-21", "Light", 1),
+        (22, "Major crash - rearended", "2024-10-30", "Heavy", 0),
+        (16, "Broken right tail light", "2024-09-12", "Light", 1),
+        (54, "T-boned - passenger side", "2024-12-01", "Moderate", 0)
     ]
     
     cursor.executemany("""
-    INSERT INTO vehicles (brand, model, year, fuel_type, purchase_price, purchase_date, mileage_km, availability)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, sample_data)'''
+    INSERT INTO damages (vehicle_id, description, date, damage_severity, repair_status)
+    VALUES (?, ?, ?, ?, ?)
+    """, sample_data)
     
     conn.commit()
     conn.close()

@@ -7,13 +7,14 @@ from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from db import init_db
 import inspect
 
+
 load_dotenv()
 
 app = Flask(__name__)
 
 DATABASE = os.getenv("DATABASE")
 SECRET_KEY = os.getenv('SECRET_KEY')
-USERS_SERVICE_URL = os.getenv('USERS_SERVICE_URL')
+# USERS_SERVICE_URL = os.getenv('USERS_SERVICE_URL')
 
 app.config['JWT_SECRET_KEY'] = SECRET_KEY
 jwt = JWTManager(app)
@@ -45,172 +46,99 @@ swagger = Swagger(app, config=swagger_config)
 
 init_db()
 
-@app.route('/vehicles', methods=['POST'])
+@app.route('/damages', methods=['POST'])
 @jwt_required() 
-def add_vehicle():
+def add_damage():
     """
-    Add a new vehicle to the database.
+    Add a new damage to the database.
     
     ---
     tags:
-      - Vehicles
+      - Damages
     security:
       - BearerAuth: []
     parameters:
       - name: body
         in: body
         required: true
-        description: Vehicle details
+        description: Damage details
         schema:
           type: object
           properties:
-            brand:
+            vehicle_id:
               type: string
-            model:
+            description:
               type: string
-            year:
+            date:
+              type: string
+            damage_severity:
+              type: string
+              enum: ['Light', 'Moderate', 'Heavy']
+            repair_status:
               type: integer
-            fuel_type:
-              type: string
-            purchase_price:
-              type: number
-            purchase_date:
-              type: string
-              format: date
-            mileage_km:
-              type: integer
-            availability:
-              type: string
-              enum: ['Available', 'Not Available']
     responses:
       201:
-        description: Vehicle successfully added.
+        description: Damage successfully added.
       400:
         description: Missing required fields.
     """
     data = request.get_json()
-    required_fields = ["brand", "model", "year", "fuel_type", "purchase_price", "purchase_date", "mileage_km", "availability"]
+    required_fields = ["vehicle_id", "description", "date", "damage_severity", "repair_status"]
     
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
     
     conn = sqlite3.connect(DATABASE)
     cursor = conn.execute("""
-        INSERT INTO vehicles (brand, model, year, fuel_type, purchase_price, purchase_date, mileage_km, availability)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (data["brand"], data["model"], data["year"], data["fuel_type"], data["purchase_price"],
-          data["purchase_date"], data["mileage_km"], data["availability"]))
+        INSERT INTO vehicles (vehicle_id, description, date, damage_severity, repair_status)
+        VALUES (?, ?, ?, ?, ?)
+    """, (data["vehicle_id"], data["description"], data["date"], data["damage_severity"], data["repair_status"]))
     conn.commit()
     vehicle_id = cursor.lastrowid
     conn.close()
-    return jsonify({"id": vehicle_id, "message": "Vehicle added successfully"}), 201
+    return jsonify({"id": damage_id, "message": "Damage added successfully"}), 201
 
-@app.route('/vehicles', methods=['GET'])
-@jwt_required()
-def get_vehicles():
+@app.route('/damages', methods=['GET'])
+# @jwt_required()
+def get_damages():
     """
-    Retrieve vehicle details with optional filters.
+    Retrieve damage details with optional filters.
 
     ---
     tags:
-      - Vehicles
+      - Damages
     security:
       - BearerAuth: []
     parameters:
-      - name: brand
-        in: query
-        type: string
-        required: false
-        description: Filter by vehicle brand.
-      - name: model
-        in: query
-        type: string
-        required: false
-        description: Filter by vehicle model.
-      - name: year
+      - name: damage_id
         in: query
         type: integer
         required: false
-        description: Filter by vehicle year.
-      - name: fuel_type
+        description: Filter by damage id.
+      - name: damage severity
         in: query
         type: string
+        enum: ['Light', 'Moderate', 'Heavy']
         required: false
-        description: Filter by fuel type (e.g., 'Petrol', 'Diesel').
-      - name: availability
-        in: query
-        type: string
-        enum: ['Available', 'Not Available']
-        required: false
-        description: Filter by vehicle availability.
-      - name: min_price
-        in: query
-        type: number
-        required: false
-        description: Filter by minimum purchase price.
-      - name: max_price
-        in: query
-        type: number
-        required: false
-        description: Filter by maximum purchase price.
-      - name: max_mileage
-        in: query
-        type: integer
-        required: false
-        description: Filter by maximum mileage (km).
+        description: Filter by damage severity.
     responses:
       200:
-        description: List of vehicles.
+        description: List of damages.
     """
     filters = []
-    query = "SELECT * FROM vehicles WHERE 1=1"
+    query = "SELECT * FROM damages WHERE 1=1"
 
-    # Filter by brand
-    brand = request.args.get('brand')
-    if brand:
-        query += " AND brand = ?"
-        filters.append(brand)
+    # Filter by vehicle id
+    vehicle_id = request.args.get('vehicle_id')
+    if vehicle_id:
+        query += " AND vehicle_id = ?"
+        filters.append(vehicle_id)
 
-    # Filter by model
-    model = request.args.get('model')
-    if model:
-        query += " AND model = ?"
-        filters.append(model)
-
-    # Filter by year
-    year = request.args.get('year')
-    if year:
-        query += " AND year = ?"
-        filters.append(year)
-
-    # Filter by fuel type
-    fuel_type = request.args.get('fuel_type')
-    if fuel_type:
-        query += " AND fuel_type = ?"
-        filters.append(fuel_type)
-
-    # Filter by availability
-    availability = request.args.get('availability')
-    if availability:
-        query += " AND availability = ?"
-        filters.append(availability)
-
-    # Filter by price range
-    min_price = request.args.get('min_price')
-    if min_price:
-        query += " AND purchase_price >= ?"
-        filters.append(min_price)
-
-    max_price = request.args.get('max_price')
-    if max_price:
-        query += " AND purchase_price <= ?"
-        filters.append(max_price)
-
-    # Filter by mileage
-    max_mileage = request.args.get('max_mileage')
-    if max_mileage:
-        query += " AND mileage_km <= ?"
-        filters.append(max_mileage)
+    # Filter by damage severity
+    damage_severity = request.args.get('damage_severity')
+    if damage_severity:
+        query += " AND damage_severity = ?"
+        filters.append(damage_severity)
 
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
@@ -221,53 +149,46 @@ def get_vehicles():
     return jsonify(vehicles), 200
 
 
-@app.route('/vehicles/<int:vehicle_id>', methods=['PUT'])
+@app.route('/damages/<int:damage_id>', methods=['PUT'])
 @jwt_required() 
-def update_vehicle(vehicle_id):
+def update_damages(damage_id):
     """
-    Update vehicle details by ID.
+    Update damage details by ID.
     
     ---
     tags:
-      - Vehicles
+      - Damages
     security:
       - BearerAuth: []
     parameters:
-      - name: vehicle_id
+      - name: damage_id
         in: path
         type: integer
         required: true
-        description: ID of the vehicle to update.
+        description: ID of the damage to update.
       - name: body
         in: body
         required: true
-        description: Updated vehicle details.
+        description: Updated damage details.
         schema:
           type: object
           properties:
-            brand:
+            vehicle_id:
               type: string
-            model:
+            description:
               type: string
-            year:
+            date:
+              type: string
+            damage_severity:
+              type: string
+              enum: ['Light', 'Moderate', 'Heavy']
+            repair_status:
               type: integer
-            fuel_type:
-              type: string
-            purchase_price:
-              type: number
-            purchase_date:
-              type: string
-              format: date
-            mileage_km:
-              type: integer
-            availability:
-              type: string
-              enum: ['Available', 'Not Available']
     responses:
       200:
-        description: Vehicle successfully updated.
+        description: Damage successfully updated.
       404:
-        description: Vehicle not found.
+        description: Damage not found.
       400:
         description: No fields to update.
     """
@@ -275,7 +196,7 @@ def update_vehicle(vehicle_id):
     updates = []
     params = []
 
-    for key in ["brand", "model", "year", "fuel_type", "purchase_price", "purchase_date", "mileage_km", "availability"]:
+    for key in ["vehicle_id", "description", "date", "damage_severity", "repair_status"]:
         if key in data:
             updates.append(f"{key} = ?")
             params.append(data[key])
@@ -283,8 +204,8 @@ def update_vehicle(vehicle_id):
     if not updates:
         return jsonify({"error": "No fields to update"}), 400
     
-    query = f"UPDATE vehicles SET {', '.join(updates)} WHERE vehicle_id = ?"
-    params.append(vehicle_id)
+    query = f"UPDATE damages SET {', '.join(updates)} WHERE damage_id = ?"
+    params.append(damage_id)
 
     conn = sqlite3.connect(DATABASE)
     cursor = conn.execute(query, params)
@@ -293,43 +214,43 @@ def update_vehicle(vehicle_id):
     conn.close()
     
     if row_count == 0:
-        return jsonify({"error": "Vehicle not found"}), 404
+        return jsonify({"error": "Damage not found"}), 404
     
-    return jsonify({"message": "Vehicle updated successfully"}), 200
+    return jsonify({"message": "Damage updated successfully"}), 200
 
-@app.route('/vehicles/<int:vehicle_id>', methods=['DELETE'])
+@app.route('/damages/<int:damage_id>', methods=['DELETE'])
 @jwt_required() 
-def delete_vehicle(vehicle_id):
+def delete_damage(damage_id):
     """
-    Delete a vehicle by ID.
+    Delete a damage by ID.
     
     ---
     tags:
-      - Vehicles
+      - Damages
     security:
       - BearerAuth: []
     parameters:
-      - name: vehicle_id
+      - name: damage_id
         in: path
         type: integer
         required: true
-        description: ID of the vehicle to delete.
+        description: ID of the damage to delete.
     responses:
       200:
-        description: Vehicle successfully deleted.
+        description: Damage successfully deleted.
       404:
-        description: Vehicle not found.
+        description: Damage not found.
     """
     conn = sqlite3.connect(DATABASE)
-    cursor = conn.execute("DELETE FROM vehicles WHERE vehicle_id = ?", (vehicle_id,))
+    cursor = conn.execute("DELETE FROM damages WHERE damage_id = ?", (damage_id,))
     conn.commit()
     row_count = cursor.rowcount
     conn.close()
     
     if row_count == 0:
-        return jsonify({"error": "Vehicle not found"}), 404
+        return jsonify({"error": "Damage not found"}), 404
     
-    return jsonify({"message": "Vehicle deleted successfully"}), 200
+    return jsonify({"message": "Damage deleted successfully"}), 200
 
 
 @app.route('/endpoints', methods=['GET'])
