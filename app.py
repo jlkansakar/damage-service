@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 DATABASE = os.getenv("DATABASE")
 SECRET_KEY = os.getenv('SECRET_KEY')
-# USERS_SERVICE_URL = os.getenv('USERS_SERVICE_URL')
+
 
 app.config['JWT_SECRET_KEY'] = SECRET_KEY
 jwt = JWTManager(app)
@@ -90,16 +90,16 @@ def add_damage():
     
     conn = sqlite3.connect(DATABASE)
     cursor = conn.execute("""
-        INSERT INTO vehicles (vehicle_id, description, date, damage_severity, repair_status)
+        INSERT INTO damages (vehicle_id, description, date, damage_severity, repair_status)
         VALUES (?, ?, ?, ?, ?)
     """, (data["vehicle_id"], data["description"], data["date"], data["damage_severity"], data["repair_status"]))
     conn.commit()
-    vehicle_id = cursor.lastrowid
+    damage_id = cursor.lastrowid
     conn.close()
     return jsonify({"id": damage_id, "message": "Damage added successfully"}), 201
 
 @app.route('/damages', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_damages():
     """
     Retrieve damage details with optional filters.
@@ -115,7 +115,7 @@ def get_damages():
         type: integer
         required: false
         description: Filter by damage id.
-      - name: damage severity
+      - name: damage_severity
         in: query
         type: string
         enum: ['Light', 'Moderate', 'Heavy']
@@ -128,11 +128,11 @@ def get_damages():
     filters = []
     query = "SELECT * FROM damages WHERE 1=1"
 
-    # Filter by vehicle id
-    vehicle_id = request.args.get('vehicle_id')
-    if vehicle_id:
-        query += " AND vehicle_id = ?"
-        filters.append(vehicle_id)
+    # Filter by damage_id
+    damage_id = request.args.get('damage_id')
+    if damage_id:
+        query += " AND damage_id = ?"
+        filters.append(damage_id)
 
     # Filter by damage severity
     damage_severity = request.args.get('damage_severity')
@@ -291,6 +291,8 @@ def endpoints():
                 'jwt_required': jwt_required
             })
     return jsonify({'endpoints': routes}), 200
+
+
 
 
 if __name__ == '__main__':
