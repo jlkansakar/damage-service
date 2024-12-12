@@ -1,12 +1,12 @@
-# Vehicle Service API
+# Damage Service API
 
-This API allows users to manage vehicle data in a database, including adding, retrieving, updating, and deleting vehicles. It supports JWT authentication for secure access.
+This API allows the user to sort and manage through damages that have come upon their cars, with all CRUD-operations present.
 
 ## Features
-- **Add Vehicle**: Add a new vehicle to the database.
-- **Get Vehicles**: Retrieve a list of vehicles with optional filters (e.g., brand, model, year, price).
-- **Update Vehicle**: Update details of a vehicle by ID.
-- **Delete Vehicle**: Delete a vehicle by ID.
+- **Add Damages**: Add a new damage to the existing database.
+- **Get Damages**: Retrieve a list of damages with relevant filters.
+- **Update Damages**: Update details of a damage by ID.
+- **Delete Damages**: Delete a damage by ID.
 - **Endpoints**: View all available API endpoints with descriptions and methods.
 
 ## Setup
@@ -19,12 +19,12 @@ This API allows users to manage vehicle data in a database, including adding, re
 - Flask-JWT-Extended
 - python-dotenv
 
-### Installation
+### Installing and running the code
 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/Fred062f/vehicle-service.git
+   git clone https://github.com/jlkansakar/damage-service
    ```
 
 2. Install the required Python packages:
@@ -58,7 +58,7 @@ The application will be available at `http://127.0.0.1:5000`.
 
 ### API Documentation
 
-Once the server is running, you can access the API documentation at:
+Once the server is up and running, you can access the API documentation here:
 
 ```
 http://127.0.0.1:5000/apidocs/
@@ -66,7 +66,7 @@ http://127.0.0.1:5000/apidocs/
 
 ### Authentication
 
-This API uses JWT (JSON Web Tokens) for authentication. You must include a valid JWT token in the `Authorization` header for all secure endpoints. The token should be in the format:
+This application uses JWT (JSON Web Tokens) for authentication. You must include a valid JWT token in the `Authorization` header for all secure endpoints. The token should formatted in the following way:
 
 ```
 Authorization: Bearer <your_jwt_token>
@@ -74,63 +74,60 @@ Authorization: Bearer <your_jwt_token>
 
 ### Endpoints
 
-1. **POST /vehicles**
-   - Add a new vehicle.
+1. **POST /add**
+   - Add a new damage instance.
    - Requires JWT token.
 
-2. **GET /vehicles**
-   - Retrieve vehicle details with optional query filters.
+2. **GET /list**
+   - Retrieve damage details with optional query filters.
    - Requires JWT token.
 
-3. **PUT /vehicles/{vehicle_id}**
-   - Update vehicle details by ID.
+3. **PUT /update**
+   - Update damage details by ID.
    - Requires JWT token.
 
-4. **DELETE /vehicles/{vehicle_id}**
-   - Delete a vehicle by ID.
+4. **DELETE /remove**
+   - Delete a damage by ID.
    - Requires JWT token.
 
-5. **GET /endpoints**
+5. **GET /**
    - List all available API endpoints with their descriptions, methods, and JWT requirements.
    - No authentication required.
 
 ## Example Usage
 
-### Add Vehicle
+### Add damage
 ```bash
-curl -X POST http://127.0.0.1:5000/vehicles \
+curl -X POST http://127.0.0.1:5000/add \
 -H "Authorization: Bearer <your_jwt_token>" \
 -H "Content-Type: application/json" \
 -d '{
-  "brand": "Toyota",
-  "model": "Corolla",
-  "year": 2020,
-  "fuel_type": "Petrol",
-  "purchase_price": 20000,
-  "purchase_date": "2020-01-01",
-  "mileage_km": 15000,
-  "availability": "Available"
+   "vehicle_id": 27,
+   "description": "Right turn crash - front fender right side is crushed",
+   "date": "2024-07-06,
+   "damage_severity": "Moderate",
+   "repair_status": 1
 }'
 ```
 
-### Get Vehicles
+### Get Damages
 ```bash
-curl -X GET "http://127.0.0.1:5000/vehicles?brand=Toyota&availability=Available" \
+curl -X GET "http://127.0.0.1:5000/list" \
 -H "Authorization: Bearer <your_jwt_token>"
 ```
 
-### Update Vehicle
+### Update damage 
 ```bash
-curl -X PUT "http://127.0.0.1:5000/vehicles/1" \
+curl -X PUT "http://127.0.0.1:5000/update/1" \
 -H "Authorization: Bearer <your_jwt_token>" \
 -H "Content-Type: application/json" \
 -d '{
-  "availability": "Not Available"
+  "repair_status": 1
 }'
 ```
 
-### Delete Vehicle
+### Delete damage
 ```bash
-curl -X DELETE "http://127.0.0.1:5000/vehicles/1" \
+curl -X DELETE "http://127.0.0.1:5000/remove/1" \
 -H "Authorization: Bearer <your_jwt_token>"
 ```
