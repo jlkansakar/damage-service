@@ -46,7 +46,7 @@ swagger = Swagger(app, config=swagger_config)
 
 init_db()
 
-@app.route('/damages', methods=['POST'])
+@app.route('/add', methods=['POST'])
 @jwt_required() 
 def add_damage():
     """
@@ -98,7 +98,7 @@ def add_damage():
     conn.close()
     return jsonify({"id": damage_id, "message": "Damage added successfully"}), 201
 
-@app.route('/damages', methods=['GET'])
+@app.route('/list', methods=['GET'])
 @jwt_required()
 def get_damages():
     """
@@ -149,7 +149,7 @@ def get_damages():
     return jsonify(vehicles), 200
 
 
-@app.route('/damages/<int:damage_id>', methods=['PUT'])
+@app.route('/update/<int:damage_id>', methods=['PUT'])
 @jwt_required() 
 def update_damages(damage_id):
     """
@@ -218,7 +218,7 @@ def update_damages(damage_id):
     
     return jsonify({"message": "Damage updated successfully"}), 200
 
-@app.route('/damages/<int:damage_id>', methods=['DELETE'])
+@app.route('/remove/<int:damage_id>', methods=['DELETE'])
 @jwt_required() 
 def delete_damage(damage_id):
     """
@@ -253,7 +253,7 @@ def delete_damage(damage_id):
     return jsonify({"message": "Damage deleted successfully"}), 200
 
 
-@app.route('/endpoints', methods=['GET'])
+@app.route('/', methods=['GET'])
 def endpoints():
     """
     List all available endpoints in the API, including their descriptions, methods, and JWT token requirements.
