@@ -96,7 +96,7 @@ def add_damage():
     conn.commit()
     damage_id = cursor.lastrowid
     conn.close()
-    return jsonify({"id": damage_id, "message": "Damage added successfully"}), 201
+    return jsonify({"damage_id": damage_id, "message": "Damage added successfully"}), 201
 
 @app.route('/list', methods=['GET'])
 @jwt_required()
